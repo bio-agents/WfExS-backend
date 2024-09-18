@@ -1,0 +1,1 @@
+container_recipes/full-installer.bash

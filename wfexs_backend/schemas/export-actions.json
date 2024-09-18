@@ -1,0 +1,218 @@
+{
+	"$id": "https://www.eosc-life.eu/d7/WfExS-backend/Export-Actions",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "WfExS-backend exports definition",
+	"description": "WfExS-backend stage definition file (EOSC-Life Demonstrator 7 JSON Schemas)",
+	"$defs": {
+		"ExportAction": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"title": "A unique, symbolic name for this export action",
+					"type": "string",
+					"minLength": 1
+				},
+				"plugin": {
+					"title": "The plugin to be used to export the contents, and obtain a permanent / public identifier",
+					"type": "string",
+					"minLength": 1
+				},
+				"what": {
+					"title": "What output(s) to export",
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "string",
+								"const": ":working-directory:"
+							},
+							{
+								"type": "string",
+								"pattern": "^:stage-rocrate:(full|(inputs|workflow|containers)(,(inputs|workflow|containers))*)?$"
+							},
+							{
+								"type": "string",
+								"pattern": "^:provenance-rocrate:(full|(inputs|outputs|workflow|containers)(,(inputs|outputs|workflow|containers))*)?$"
+							},
+							{
+								"type": "string",
+								"pattern": "^(param|envvar|output):([^:;]+:)?[^:;]*$"
+							}
+						]
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"preferred-pid": {
+					"name": "Preferred permanent id to be assigned",
+					"documentation": "Some export plugins are able to (or even have to) choose the permanent identifier to assign. Others will ignore this",
+					"type": "string",
+					"minLength": 1
+				},
+				"title": {
+					"name": "Dataset title",
+					"documentation": "Title to be assigned to the dataset. If no title is provided, WfExS-backend will create a custom one. Placeholders instance_id , nickname , wfexs_verstr , wfexs_backend_name and wfexs_backend_url are currently supported.",
+					"type": "string",
+					"minLength": 1
+				},
+				"documentation": {
+					"name": "Dataset documentation",
+					"documentation": "Documentation to be assigned to the dataset. If no documentation is provided, WfExS-backend will create a brief, agnostic one. Placeholders instance_id , nickname , wfexs_verstr , wfexs_backend_name and wfexs_backend_url are currently supported.",
+					"type": "string",
+					"minLength": 1
+				},
+				"custom-metadata": {
+					"name": "Custom metadata",
+					"documentation": "Metadata tailored specifically for the service being abstracted by the chosen plugin.",
+					"type": "object"
+				},
+				"community-custom-metadata": {
+					"name": "Custom community metadata",
+					"documentation": "Deposition sites like Zenodo, B2SHARE and Dataverse have the concept of community, which can accept or require separate, additional metadata with their own validation rules. This metadata is specifically for the community in the service being abstracted by the chosen plugin.",
+					"type": "object"
+				},
+				"licences": {
+					"name": "Licences to attach to this export item",
+					"documentation": "The list of licences attached to this export item",
+					"type": "array",
+					"items": {
+						"type": "string",
+						"minLength": 1,
+						"oneOf": [
+							{
+								"format": "uri"
+							},
+							{
+								"$comment": "This list of short names is declared at https://about.workflowhub.eu/Workflow-RO-Crate/#supported-licenses",
+								"enum": [
+									"AFL-3.0",
+									"APL-1.0",
+									"Apache-1.1",
+									"Apache-2.0",
+									"APSL-2.0",
+									"Artistic-2.0",
+									"AAL",
+									"BSD-2-Clause",
+									"BSD-3-Clause",
+									"BitTorrent-1.1",
+									"BSL-1.0",
+									"CC0-1.0",
+									"CNRI-Python",
+									"CUA-OPL-1.0",
+									"CECILL-2.1",
+									"CDDL-1.0",
+									"CPAL-1.0",
+									"CATOSL-1.1",
+									"EUDatagrid",
+									"EPL-1.0",
+									"ECL-2.0",
+									"EFL-2.0",
+									"Entessa",
+									"EUPL-1.1",
+									"Fair",
+									"Frameworx-1.0",
+									"AGPL-3.0",
+									"GPL-2.0",
+									"GPL-3.0",
+									"LGPL-2.1",
+									"LGPL-3.0",
+									"HPND",
+									"IPL-1.0",
+									"IPA",
+									"ISC",
+									"Intel",
+									"LPPL-1.3c",
+									"LPL-1.0",
+									"LPL-1.02",
+									"MIT",
+									"mitre",
+									"MS-PL",
+									"MS-RL",
+									"MirOS",
+									"Motosoto",
+									"MPL-1.0",
+									"MPL-1.1",
+									"MPL-2.0",
+									"Multics",
+									"NASA-1.3",
+									"NTP",
+									"Naumen",
+									"NGPL",
+									"Nokia",
+									"NPOSL-3.0",
+									"OCLC-2.0",
+									"OFL-1.1",
+									"OGL-UK-1.0",
+									"OGL-UK-2.0",
+									"OGL-UK-3.0",
+									"OGTSL",
+									"OSL-3.0",
+									"PHP-3.0",
+									"PostgreSQL",
+									"Python-2.0",
+									"QPL-1.0",
+									"RPSL-1.0",
+									"RPL-1.5",
+									"RSCPL",
+									"SimPL-2.0",
+									"Sleepycat",
+									"SISSL",
+									"SPL-1.0",
+									"Watcom-1.0",
+									"NCSA",
+									"Unlicense",
+									"VSL-1.0",
+									"W3C",
+									"Xnet",
+									"ZPL-2.0",
+									"WXwindows",
+									"Zlib",
+									"notspecified"
+								]
+							}
+						]
+					}
+				},
+				"preferred-scheme": {
+					"name": "Preferred scheme to be used",
+					"documentation": "Very few export plugins are able to provide permanent ids in several schemes. Even fewer have to know it. Most of them will ignore this",
+					"type": "string",
+					"minLength": 1
+				},
+				"security-context": {
+					"documentation": "The name of the most of the time required security context to be used to authenticate in order to export the resource",
+					"type": "string",
+					"pattern": "^[^:;]+$",
+					"minLength": 1
+				},
+				"setup": {
+					"documentation": "Optional parameters to be passed to set up the export plugin, containing details like the server to connect to",
+					"type": "object",
+					"minProperties": 1
+				}
+			},
+			"required": [
+				"id",
+				"plugin",
+				"what"
+			]
+		},
+		"ExportsBlock": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/ExportAction"
+			},
+			"uniqueItems": true
+		}
+	},
+	"type": "object",
+	"properties": {
+		"exports": {
+			"$ref": "#/$defs/ExportsBlock"
+		}
+	},
+	"required": [
+		"exports"
+	],
+	"additionalProperties": false
+}

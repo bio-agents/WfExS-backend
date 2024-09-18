@@ -1,0 +1,91 @@
+{
+	"$id": "https://www.eosc-life.eu/d7/WfExS-backend/Security-Context",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "WfExS-backend security context",
+	"description": "WfExS-backend security context file (EOSC-Life Demonstrator 7 JSON Schemas)",
+	"type": "object",
+	"definitions": {
+		"SecContext": {
+			"type": "object",
+			"oneOf": [
+				{
+					"properties": {
+						"username": {
+							"description": "The user name",
+							"type": "string",
+							"minLength": 1
+						},
+						"password": {
+							"description": "The user password associated to the username",
+							"type": "string",
+							"minLength": 0
+						}
+					},
+					"additionalProperties": true,
+					"required": [
+						"username",
+						"password"
+					]
+				},
+				{
+					"properties": {
+						"access_key": {
+							"type": "string",
+							"minLength": 1
+						},
+						"secret_key": {
+							"type": "string",
+							"minLength": 1
+						}
+					},
+					"additionalProperties": true,
+					"required": [
+						"access_key",
+						"secret_key"
+					]
+				},
+				{
+					"properties": {
+						"token": {
+							"description": "The authentication token",
+							"type": "string",
+							"minLength": 1
+						},
+						"token_header": {
+							"description": "On HTTP, the authentication token is used to fill-in an 'Authentication: Bearer ' header. Sometimes authentication through tokens require using custom headers, like it happens with SevenBridges",
+							"type": "string",
+							"minLength": 1
+						}
+					},
+					"additionalProperties": true,
+					"required": [
+						"token"
+					]
+				}
+			],
+			"properties": {
+				"method": {
+					"type": "string",
+					"enum": [ "GET", "POST" ],
+					"default": "GET"
+				},
+				"headers": {
+					"description": "Custom headers to be used on the request",
+					"type": "object"
+				}
+			},
+			"minProperties": 1
+		}
+	},
+	"patternProperties": {
+		"^[^:;]+$": {
+			"title": "Security context by name",
+			"$ref": "#/definitions/SecContext"
+		},
+		"^[a-z][a-z0-9+.-]*:.*$": {
+			"title": "Security context by prefix",
+			"$ref": "#/definitions/SecContext"
+		}
+	},
+	"additionalProperties": false
+}

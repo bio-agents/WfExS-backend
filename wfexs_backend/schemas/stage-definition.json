@@ -1,0 +1,827 @@
+{
+	"$id": "https://www.eosc-life.eu/d7/WfExS-backend/Stage-Definition",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "WfExS-backend stage definition",
+	"description": "WfExS-backend stage definition file (EOSC-Life Demonstrator 7 JSON Schemas)",
+	"type": "object",
+	"definitions": {
+		"PlainURI": {
+			"type": "string",
+			"format": "uri",
+			"minLength": 1
+		},
+		"PlaceholderURI": {
+			"type": "string",
+			"pattern": "$\\{[^}]+\\}",
+			"minLength": 1
+		},
+		"LicensedURI": {
+			"type": "object",
+			"properties": {
+				"uri": {
+					"description": "The URI of the resource",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/PlainURI"
+						},
+						{
+							"$ref": "#/definitions/PlaceholderURI"
+						}
+					]
+				},
+				"licences": {
+					"type": "array",
+					"items": {
+						"description": "URL to the description of the licence of the data. And by default, no permission to use or distribute it",
+						"default": "https://choosealicense.com/no-permission/",
+						"$ref": "#/definitions/PlainURI"
+					}
+				},
+				"attributions": {
+					"type": "array",
+					"uniqueItems": true,
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"description": "Name of the author",
+								"minLength": 1
+							},
+							"pid": {
+								"description": "A unique way to represent this author, either through her/his ORCID or another permanent, representative link",
+								"$ref": "#/definitions/PlainURI"
+							},
+							"roles": {
+								"type": "array",
+								"uniqueItems": true,
+								"items": {
+									"type": "string",
+									"documentation": "The valid roles come from CASRAI CRediT, and can be visited through http://credit.niso.org/contributor-roles/{term}/",
+									"enum": [
+										"conceptualization",
+										"data-curation",
+										"formal-analysis",
+										"funding-acquisition",
+										"investigation",
+										"methodology",
+										"project-administration",
+										"resources",
+										"software",
+										"supervision",
+										"validation",
+										"visualization",
+										"writing-original-draft",
+										"writing-review-editing"
+									]
+								},
+								"minItems": 1
+							}
+						},
+						"required": [
+							"name",
+							"pid",
+							"roles"
+						]
+					}
+				},
+				"security-context": {
+					"documentation": "The name of the optional security context to be used to authenticate in order to reach the resource",
+					"type": "string",
+					"pattern": "^[^:;]+$",
+					"minLength": 1
+				}
+			},
+			"required": [
+				"uri"
+			],
+			"additionalProperties": false
+		},
+		"InputURI": {
+			"oneOf": [
+				{
+					"$ref": "#/definitions/PlainURI"
+				},
+				{
+					"$ref": "#/definitions/PlaceholderURI"
+				},
+				{
+					"$ref": "#/definitions/LicensedURI"
+				},
+				{
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"$ref": "#/definitions/LicensedURI"
+							},
+							{
+								"$ref": "#/definitions/PlainURI"
+							},
+							{
+								"$ref": "#/definitions/PlaceholderURI"
+							},
+							{
+								"description": "This element is an array of alternate URLs, so any of them provide the very same resources",
+								"type": "array",
+								"items": {
+									"oneOf": [
+										{
+											"$ref": "#/definitions/LicensedURI"
+										},
+										{
+											"$ref": "#/definitions/PlainURI"
+										},
+										{
+											"$ref": "#/definitions/PlaceholderURI"
+										}
+									]
+								},
+								"minItems": 2
+							}
+						]
+					},
+					"minItems": 1
+				}
+			]
+		},
+		"DirFile": {
+			"type": "object",
+			"properties": {
+				"c-l-a-s-s": {
+					"type": "string",
+					"enum": [
+						"File",
+						"Directory",
+						"Value",
+						"ContentWithURIs"
+					]
+				},
+				"value": {
+					"description": "When 'c-l-a-s-s' is a single file or a value, the assigned value",
+					"oneOf": [
+						{
+							"type": "string",
+							"minLength": 1
+						},
+						{
+							"type": "array",
+							"items": {
+								"type": "string",
+								"minLength": 1
+							},
+							"minItems": 1
+						}
+					]
+				},
+				"tabular": {
+					"description": "When it is content with URIs, we are telling it is a tabular one with this key. URIs are fetched, and the absolute paths replace them in the generated content tab",
+					"type": "object",
+					"properties": {
+						"uri-columns": {
+							"description": "The columns where URIs to be fetched are found",
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"minInclusive": 0
+							},
+							"uniqueItems": true,
+							"minItems": 1
+						},
+						"row-sep": {
+							"description": "The string used to split the tabulated content by rows",
+							"type": "string",
+							"enum": [
+								"\n",
+								"\r",
+								"\t\n"
+							],
+							"default": "\n",
+							"minLength": 1
+						},
+						"column-sep": {
+							"description": "The regular expression used to split the tabulated content by columns",
+							"type": "string",
+							"minLength": 1
+						},
+						"header-rows": {
+							"description": "How many header rows should be skipped?",
+							"type": "integer",
+							"minInclusive": 0,
+							"default": 0
+						}
+					},
+					"required": [
+						"uri-columns",
+						"column-sep"
+					]
+				},
+				"url": {
+					"description": "The URL(s) / URI(s) where this input is available",
+					"$ref": "#/definitions/InputURI"
+				},
+				"secondary-urls": {
+					"description": "Secondary URLs / URIs are pointing to contents which will feed secondary inputs (CWL concept)",
+					"$ref": "#/definitions/InputURI"
+				},
+				"preferred-name": {
+					"description": "Preferred base name / relative path for this input, instead of the derived one from the URL",
+					"type": ["boolean", "string"],
+					"default": false,
+					"minLength": 1
+				},
+				"relative-dir": {
+					"description": "Put contents fetched for this input in this relative directory. This option does not affect preferred-name",
+					"type": ["boolean", "string"],
+					"default": false,
+					"minLength": 1
+				},
+				"security-context": {
+					"description": "Use an explicitly named security context",
+					"type": "string",
+					"minLength": 1
+				},
+				"disclosable": {
+					"description": "Whether this input contents can be included in RO-Crates or exported",
+					"type": "boolean",
+					"default": true
+				},
+				"cacheable": {
+					"description": "Whether a copy of this input contents can be kept locally outside the working directory",
+					"type": "boolean",
+					"default": true
+				},
+				"clonable": {
+					"description": "Whether a copy of this input contents can be kept locally inside the working directory",
+					"type": "boolean",
+					"default": true
+				},
+				"globExplode": {
+					"description": "When this is set, and the class is directory, it helps filtering in what it should be included",
+					"type": "string"
+				},
+				"autoFill": {
+					"description": "When this key is true, the directory or file is considered an output one",
+					"type": "boolean",
+					"default": false
+				},
+				"autoPrefix": {
+					"description": "When autoFill is true and this parameter is false, this directory is mapped to the parent output one for this execution. When both autoFill and this parameter are true, an output file or directory name is assigned, based on its complete param name",
+					"type": "boolean",
+					"default": false
+				}
+			},
+			"required": [
+				"c-l-a-s-s"
+			],
+			"additionalProperties": false,
+			"allOf": [
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"enum": [
+									"Directory",
+									"File"
+								]
+							}
+						},
+						"required": [
+							"url"
+						]
+					},
+					"then":	{
+						"not": {
+							"required": [
+								"value",
+								"tabular",
+								"autoFill",
+								"autoPrefix"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"const": "ContentWithURIs"
+							}
+						},
+						"required": [
+							"url"
+						]
+					},
+					"then":	{
+						"not": {
+							"required": [
+								"value",
+								"autoFill",
+								"autoPrefix"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"enum": [
+									"Directory",
+									"File"
+								]
+							}
+						},
+						"required": [
+							"autoFill"
+						]
+					},
+					"then":	{
+						"not": {
+							"required": [
+								"value",
+								"tabular",
+								"url",
+								"secondary-urls",
+								"security-context",
+								"globExplode"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"const": "Directory"
+							}
+						}
+					},
+					"then": {
+						"not": {
+							"required": [
+								"value"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"const": "File"
+							}
+						},
+						"required": [
+							"value"
+						]
+					},
+					"then":	{
+						"not": {
+							"required": [
+								"url",
+								"tabular",
+								"secondary-urls",
+								"security-context",
+								"globExplode",
+								"autoFill",
+								"autoPrefix"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"const": "ContentWithURIs"
+							}
+						},
+						"required": [
+							"value"
+						]
+					},
+					"then":	{
+						"not": {
+							"required": [
+								"url",
+								"secondary-urls",
+								"security-context",
+								"globExplode",
+								"autoFill",
+								"autoPrefix"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"const": "Value"
+							}
+						}
+					},
+					"then": {
+						"required": [
+							"value"
+						],
+						"not": {
+							"required": [
+								"tabular",
+								"url",
+								"secondary-urls",
+								"preferred-name",
+								"relative-dir",
+								"security-context",
+								"globExplode",
+								"autoFill",
+								"autoPrefix",
+								"cacheable",
+								"clonable"
+							]
+						}
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"c-l-a-s-s": {
+								"const": "ContentWithURIs"
+							}
+						}
+					},
+					"then": {
+						"required": [
+							"tabular"
+						],
+						"not": {
+							"required": [
+								"globExplode",
+								"autoFill",
+								"autoPrefix"
+							]
+						},
+						"if": {
+							"required": [
+								"url"
+							]
+						},
+						"then": {
+							"not": {
+								"required": [
+									"value"
+								]
+							}
+						},
+						"else": {
+							"required": [
+								"value"
+							],
+							"not": {
+								"required": [
+									"url",
+									"secondary-urls",
+									"security-context"
+								]
+							}
+						}
+					}
+				}
+			]
+		},
+		"EnvVar": {
+			"oneOf": [
+				{
+					"type": [
+						"string",
+						"number"
+					]
+				},
+				{
+					"$ref": "#/definitions/DirFile"
+				}
+			]
+		},
+		"Param": {
+			"oneOf": [
+				{
+					"type": [
+						"string",
+						"number",
+						"boolean"
+					]
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				{
+					"$ref": "#/definitions/DirFile"
+				},
+				{
+					"$ref": "#/definitions/Params"
+				}
+			]
+		},
+		"Params": {
+			"type": "object",
+			"patternProperties": {
+				"^(?!c-l-a-s-s)[^:;]+$": {
+					"$ref": "#/definitions/Param"
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"properties": {
+		"trs_endpoint": {
+			"title": "The optional TRS endpoing",
+			"description": "If this key is set, it will tell the GA4GH TRS service where to look for the workflow_id (and optional version)",
+			"$ref": "#/definitions/PlainURI"
+		},
+		"version": {
+			"title": "Workflow version",
+			"description": "If trs_enpoint key is set, it will tell the version of the workflow_id to look for at GA4GH TRS",
+			"type": [
+				"string",
+				"integer"
+			]
+		},
+		"workflow_id": {
+			"anyOf": [
+				{
+					"$ref": "#/definitions/PlainURI"
+				},
+				{
+					"type": "string"
+				},
+				{
+					"type": "integer"
+				}
+			]
+		},
+		"nickname": {
+			"title": "A friendly nickname (prefix) for the instances",
+			"type": "string"
+		},
+		"paranoid_mode": {
+			"type": "boolean",
+			"default": false
+		},
+		"workflow_type": {
+			"title": "The optional, forced workflow type",
+			"description": "When this key is set, it is forcing the workflow type. WfExS-backend is usually able to identify the workflow type, unless there are two intertwined workflows in the same location",
+			"type": "string"
+		},
+		"workflow_config": {
+			"type": "object",
+			"properties": {
+				"secure": {
+					"type": "boolean"
+				},
+				"containerType": {
+					"title": "Container technology type to be used for this workflow",
+					"description": "Type of container technology to be used when this staging scenario is instantiated. Supported types are:\n- Singularity (default).\n- Docker.\n- Podman\n- No containerisation technology (discouraged, but needed for some workflows)\nEncrypted working directories are unsupported when Docker or Podman are used due technological limitations",
+					"type": "string",
+					"enum": [
+						"singularity",
+						"docker",
+						"podman",
+						"none"
+					]
+				},
+				"writable_containers": {
+					"type": "boolean",
+					"default": false
+				},
+				"nextflow": {
+					"type": "object",
+					"properties": {
+						"version": {
+							"type": "string",
+							"minLength": 1,
+							"default": "19.04.1"
+						},
+						"maxRetries": {
+							"title": "Retries in docker mode",
+							"description": "Retries when `engineMode` is `docker`.\nRetries system was introduced when using docker-in-docker pattern because an insidious\nbug happens sometimes. See https://forums.docker.com/t/any-known-problems-with-symlinks-on-bind-mounts/32138",
+							"type": "integer",
+							"minimum": 0,
+							"default": 5
+						},
+						"maxProcesses": {
+							"title": "(deprecated) Max number of CPUs",
+							"description": "Number of CPUs to be used by Nextflow. When this key has an explicit value of `null`, it depends on Nextflow criteria, which tries creating as many processes as available CPUs, spawning jobs in parallel. Not declaring it, or declaring and explicit value, imposes a limitation in the number of concurrent processes",
+							"oneOf": [
+								{
+									"type": "integer",
+									"minimum": 1,
+									"default": 4
+								},
+								{
+									"type": "null"
+								}
+							]
+						},
+						"maxCPUs": {
+							"title": "(deprecated) Max number of CPUs",
+							"description": "Number of CPUs to be used by Nextflow. When this key has an explicit value of `null`, it depends on Nextflow criteria, which tries creating as many processes as available CPUs, spawning jobs in parallel. Not declaring it, or declaring and explicit value, imposes a limitation in the number of concurrent processes",
+							"oneOf": [
+								{
+									"type": "integer",
+									"minimum": 1,
+									"default": 4
+								},
+								{
+									"type": "null"
+								}
+							]
+						},
+						"maxTaskDuration": {
+							"title": "Max task duration",
+							"description": "With this parameter it is possible to override the max task time declared for processes. This is needed for workflows which are not so customizable",
+							"oneOf": [
+								{
+									"type": "string",
+									"pattern": "^[0-9]+.*$"
+								},
+								{
+									"type": "null"
+								}
+							]
+						},
+						"profile": {
+							"description": "(deprecated) If defined, the profile/s to enable",
+							"oneOf": [
+								{
+									"type": "string",
+									"pattern": "^[^, \t]+[ \t]*(,[ \t]*[^, \t]+[ \t]*)*$",
+									"minLength": 1
+								},
+								{
+									"type": "array",
+									"items": {
+										"type": "string",
+										"pattern": "^[^,]+$",
+										"minLength": 1
+									},
+									"minItems": 1
+								}
+							]
+						}
+					}
+				},
+				"cwl": {
+					"type": "object",
+					"properties": {
+						"version": {
+							"type": "string",
+							"minLength": 1,
+							"default": "3.1.20210628163208"
+						}
+					}
+				}
+			}
+		},
+		"placeholders": {
+			"type": "object",
+			"additionalProperties": {
+				"type": [
+					"number",
+					"integer",
+					"string"
+				]
+			}
+		},
+		"params": {
+			"$ref": "#/definitions/Params"
+		},
+		"profile": {
+			"description": "For engines which support profiles, like Nextflow or snakemake, if defined, the profile/s to enable",
+			"oneOf": [
+				{
+					"type": "string",
+					"pattern": "^[^, \t]+[ \t]*(,[ \t]*[^, \t]+[ \t]*)*$",
+					"minLength": 1
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string",
+						"pattern": "^[^,]+$",
+						"minLength": 1
+					},
+					"minItems": 1
+				}
+			]
+		},
+		"environment": {
+			"type": "object",
+			"patternProperties": {
+				"^[^=\\0]+$": {
+					"description": "The name of an environment variable. These names cannot contain either the equal or the character \\0",
+					"$ref": "#/definitions/EnvVar"
+				}
+			},
+			"additionalProperties": false
+		},
+		"outputs": {
+			"type": "object",
+			"patternProperties": {
+				"^[^:;]+$": {
+					"type": "object",
+					"properties": {
+						"c-l-a-s-s": {
+							"type": "string",
+							"enum": [
+								"File",
+								"Directory"
+							]
+						},
+						"cardinality": {
+							"title": "Output cardinality",
+							"description": "Expected cardinality of this output",
+							"oneOf": [
+								{
+									"type": "string",
+									"enum": [
+										"1",
+										"?",
+										"*",
+										"+"
+									]
+								},
+								{
+									"type": "integer",
+									"minimum": 0
+								},
+								{
+									"type": "array",
+									"items": [
+										{
+											"type": "integer",
+											"minimum": 0
+										},
+										{
+											"type": "integer",
+											"minimum": 1
+										}
+									],
+									"minItems": 2,
+									"maxItems": 2
+								}
+							],
+							"default": 1
+						},
+						"preferredName": {
+							"description": "Preferred name for this output, honored when either filledFrom or glob are used",
+							"type": "string",
+							"minLength": 1
+						},
+						"fillFrom": {
+							"description": "Autofilled input from where to get the files and directories to be assigned to this output, useful in workflow models where outputs are not explicitly declared (Nextflow, Snakemake)",
+							"type": "string",
+							"minLength": 1
+						},
+						"syntheticOutput": {
+							"description": "Is this output a synthetic one? The default value when it is not defined depends on the type of workflow.",
+							"type": "boolean"
+						},
+						"glob": {
+							"description": "Glob pattern to get the files and directories to be assigned to this output, useful in workflow models where outputs are not explicitly declared (Nextflow, Snakemake)",
+							"type": "string",
+							"minLength": 1
+						}
+					},
+					"additionalProperties": false,
+					"required": [
+						"c-l-a-s-s"
+					]
+				}
+			}
+		},
+		"default_actions": {
+			"type": "array",
+			"$comment": "It should be '$ref': 'https://www.eosc-life.eu/d7/WfExS-backend/Export-Actions#/$defs/ExportsBlock', but the documentation generator complains"
+		}
+	},
+	"required": [
+		"workflow_id"
+	],
+	"additionalProperties": false
+}

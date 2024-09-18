@@ -1,0 +1,40 @@
+pyyaml
+jsonpath-ng
+jsonschema[format_nongpl] >= 3.0.0
+jsonschema[format_nongpl] < 4.18.0 ; python_version < '3.8'
+jsonpointer
+python-magic >= 0.4.27
+paramiko[ed25519]
+certifi
+crypt4gh
+bagit
+aioftp
+aiohttp-client-cache[sqlite] >= 0.11.0 ; python_version >= '3.8'
+aiohttp-client-cache[sqlite] < 0.11.0 ; python_version < '3.8'
+openpyxl
+xlrd2
+dulwich
+python-dxf >= 10.0.0
+genluhn >= 0.3.0
+rfc6920 >= 0.1.3
+rocrate >= 0.9.0
+boto3
+botocore
+google-cloud-storage
+pyncclient-ext >= 0.1.2
+wiktionary-term-fetcher >= 0.1.1
+funny-passphrase >= 0.2.3
+pyxdg
+groovy-parser == 0.1.1
+data-url
+pgzip
+defusedxml
+# This is needed for exception groups
+exceptiongroup ; python_version < '3.11'
+# Needed for proper JSON-LD parsing + SPARQL query
+aiohttp
+pyld
+rdflib >= 7.0.0 ; python_version >= '3.8'
+rdflib < 7.0.0 ; python_version < '3.8'
+psutil
+RWFileLock >= 0.2.2
