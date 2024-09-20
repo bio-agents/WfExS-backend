@@ -1,16 +1,3 @@
-cacheDir: ../wfexs-backend-test
-crypt4gh:
-  key: local_config.yaml.key
-  passphrase: strive backyard dividing gumball
-  pub: local_config.yaml.pub
-agents:
-  containerType: docker
-  dockerCommand: docker
-  encrypted_fs:
-    type: gocryptfs
-  engineMode: local
-  gitCommand: git
-  javaCommand: java
-  singularityCommand: singularity
-  staticBashCommand: bash-linux-x86_64
-workDir: ../wfexs-backend-test_WorkDir
+version https://git-lfs.github.com/spec/v1
+oid sha256:d55d2c52f07d593591fef8c78a7914882e5bb28389d15535f256dd3a789e3ed7
+size 409
